@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SYSTEM POWER UP</title>
+<style>
+:root{
+  --bg:#06050c; --violet:#7b2cff; --blue:#3a8dff; --ice:#bfe0ff; --panel:rgba(10,24,64,.78);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  margin:0;height:100%;min-height:100%;background:var(--bg);color:var(--ice);
+  font-family:"Rajdhani","Segoe UI",Roboto,Arial,sans-serif;
+  display:flex;overflow-y:auto;position:relative;
+}
+/* фиолетовые углы */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(123,44,255,.55),transparent 42%),
+    radial-gradient(circle at 100% 0%,rgba(123,44,255,.45),transparent 40%),
+    radial-gradient(circle at 0% 100%,rgba(123,44,255,.45),transparent 40%),
+    radial-gradient(circle at 100% 100%,rgba(123,44,255,.55),transparent 42%);
+}
+.wrap{width:100%;max-width:420px;padding:20px;position:relative;z-index:1;margin:auto}
+.sys{
+  position:relative;background:var(--panel);border:2px solid var(--blue);
+  box-shadow:0 0 22px rgba(58,141,255,.55),inset 0 0 28px rgba(58,141,255,.18);
+  backdrop-filter:blur(3px);padding:22px 20px 20px;
+  animation:open .55s cubic-bezier(.2,.9,.3,1.2) both;
+}
+@keyframes open{0%{opacity:0;transform:scale(.55) scaleY(.1)}60%{opacity:1;transform:scale(1.03) scaleY(1)}100%{transform:scale(1)}}
+.sys::before,.sys::after{content:"";position:absolute;width:16px;height:16px;border:3px solid var(--ice)}
+.sys::before{top:-5px;left:-5px;border-right:0;border-bottom:0}
+.sys::after{bottom:-5px;right:-5px;border-left:0;border-top:0}
+.title{
+  text-align:center;font-size:22px;font-weight:700;letter-spacing:.35em;color:#fff;
+  text-shadow:0 0 10px var(--blue);padding:4px 0 14px;margin-bottom:16px;
+  border-bottom:1px solid rgba(191,224,255,.35);
+}
+.title i{font-style:normal;opacity:.5;margin:0 .35em}
+.step{font-size:14px;letter-spacing:.12em;opacity:.7;margin-bottom:6px}
+.q{font-size:21px;line-height:1.3;color:#fff;margin:0 0 16px;font-weight:600}
+input[type=text],input[type=number]{
+  width:100%;background:rgba(4,10,30,.7);border:1px solid var(--blue);color:#fff;
+  font:inherit;font-size:20px;padding:13px 14px;outline:none;border-radius:0;
+}
+input:focus{box-shadow:0 0 12px rgba(58,141,255,.8)}
+input::placeholder{color:rgba(191,224,255,.4)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{
+  background:rgba(4,10,30,.7);border:1px solid rgba(58,141,255,.6);color:var(--ice);
+  font:inherit;font-size:18px;padding:13px 6px;cursor:pointer;
+}
+.opt.on{background:var(--blue);color:#04122e;border-color:#fff;box-shadow:0 0 14px var(--blue);font-weight:700}
+.opts.one{grid-template-columns:1fr}
+.opt.wide{grid-column:1/-1}
+.chk::before{content:"☐ "}
+.chk.on::before{content:"☑ "}
+.hint{font-size:14px;opacity:.65;margin:-8px 0 12px}
+.err{min-height:20px;margin:8px 0 0;font-size:15px;color:#ff7a9a}
+.btn{
+  display:block;width:100%;margin-top:10px;padding:14px;font:inherit;font-size:19px;font-weight:700;
+  letter-spacing:.2em;color:#fff;background:linear-gradient(90deg,#4a1fb8,var(--violet));
+  border:1px solid #c9a6ff;box-shadow:0 0 16px rgba(123,44,255,.7);cursor:pointer;
+}
+.btn:active{transform:scale(.98)}
+.bar{height:4px;background:rgba(191,224,255,.15);margin-top:16px}
+.bar b{display:block;height:100%;width:0;background:var(--blue);box-shadow:0 0 8px var(--blue);transition:width .3s}
+.list{margin:0 0 6px;padding:0;list-style:none;font-size:19px}
+.list li{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(191,224,255,.2)}
+.list span{opacity:.65}
+.list b{color:#fff;text-align:right}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;letter-spacing:.08em}
+.hero span{font-size:17px;color:var(--ice);border:1px solid var(--blue);padding:2px 10px;box-shadow:0 0 10px rgba(58,141,255,.5);white-space:nowrap}
+.lvl{display:flex;align-items:center;gap:12px;margin:4px 0 12px;font-size:26px;font-weight:700;color:#fff;text-shadow:0 0 10px var(--blue);white-space:nowrap}
+.lvl i{flex:1;height:1px;background:rgba(191,224,255,.45)}
+.xpbar{height:12px;background:rgba(191,224,255,.12);border:1px solid rgba(58,141,255,.6)}
+.xpbar b{display:block;height:100%;background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.xpn{text-align:right;font-size:14px;opacity:.7;margin:4px 0 14px}
+.note{font-size:16px;opacity:.75;margin:0 0 12px}
+.gain{font-size:16px;color:#8dffb5;margin:0 0 12px}
+.link{display:block;width:100%;margin-top:10px;padding:10px;background:none;border:0;color:var(--ice);opacity:.7;font:inherit;font-size:15px;letter-spacing:.15em;cursor:pointer}
+.btn.off{background:rgba(58,141,255,.2);box-shadow:none;border-color:rgba(191,224,255,.3);opacity:.7}
+.task{display:block;width:100%;text-align:left;margin-bottom:8px;font-size:17px;padding:11px 12px}
+.opt:disabled{cursor:default}
+.trow{display:flex;align-items:center;gap:10px;border:1px solid rgba(58,141,255,.6);background:rgba(4,10,30,.7);padding:10px 12px;margin-bottom:8px}
+.trow.lock{opacity:.4;border-color:rgba(191,224,255,.25)}
+.trow.on{background:var(--blue);color:#04122e;border-color:#fff;box-shadow:0 0 14px var(--blue)}
+.trow.ready{border-color:#fff;box-shadow:0 0 14px rgba(58,141,255,.8)}
+.tx{flex:1;font-size:17px;line-height:1.2}
+.tx small{display:block;font-size:13px;opacity:.7;margin-top:3px}
+.bx{width:28px;height:28px;border:2px solid var(--ice);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex:none;background:none;color:inherit;font-family:inherit;padding:0;border-radius:0}
+.trow.lock .bx,.trow:not(.ready):not(.on) .bx{border-color:rgba(191,224,255,.35)}
+.trow.ready .bx{border-color:#fff;box-shadow:0 0 10px var(--blue);cursor:pointer}
+.trow.on .bx{border-color:#04122e}
+.go{font:inherit;font-size:14px;font-weight:700;letter-spacing:.1em;color:#fff;background:linear-gradient(90deg,#4a1fb8,var(--violet));border:1px solid #c9a6ff;padding:9px 10px;cursor:pointer;flex:none}
+.camrow{display:flex;gap:14px;align-items:center;margin:0 0 12px}
+#cam{width:96px;height:128px;object-fit:cover;border:2px solid var(--blue);box-shadow:0 0 12px rgba(58,141,255,.6);transform:scaleX(-1);background:#000;flex:none}
+.tm{font-size:40px;font-weight:700;color:#fff;text-shadow:0 0 10px var(--blue);line-height:1}
+.stt{font-size:15px;opacity:.85;margin:4px 0 8px}
+.stt.bad{color:#ff9ab0;opacity:1}
+@media (prefers-reduced-motion:reduce){.sys{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="sys" id="sys"></div></div>
+
+<script>
+var QUESTIONS=[
+  {key:"name",label:"Как вас зовут?",type:"text",ph:"Введите имя"},
+  {key:"age",label:"Сколько вам лет?",type:"number",ph:"Например, 20",min:10,max:99},
+  {key:"weight",label:"Какой у вас вес? (кг)",type:"number",ph:"Например, 75",min:30,max:300},
+  {key:"height",label:"Какой у вас рост? (см)",type:"number",ph:"Например, 175",min:100,max:250},
+  {key:"days",label:"В какие дни тренируетесь?",type:"multi",hint:"Можно выбрать несколько",opts:["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"]},
+  {key:"parts",label:"Что будем качать?",type:"multi",hint:"Можно выбрать несколько",opts:["Грудь","Спина","Ноги","Руки","Плечи","Пресс","Всё тело"]},
+  {key:"mind",label:"Качаем ум? Чтение книг?",type:"choice",hint:"Если пропустить, УМ уберём из статистики",opts:["ДА","ПРОПУСТИТЬ"]},
+  {key:"level",label:"Какой у вас уровень подготовки?",type:"choice",hint:"От этого зависит сложность квестов",opts:["Не тренировался","Уже есть опыт","Профессионал"]}
+];
+var LABELS={name:"Имя",age:"Возраст",weight:"Вес",height:"Рост",days:"Дни",parts:"Качаем",mind:"Читаем книги",level:"Уровень",difficulty:"Квесты"};
+var LEVELS={"Не тренировался":"Лёгкие","Уже есть опыт":"Средние","Профессионал":"Тяжёлые"};
+var i=0,data={},sys=document.getElementById("sys");
+
+function head(){return '<div class="title">SYSTEM</div>';}
+
+function render(){
+  var q=QUESTIONS[i],h=head();
+  h+='<div class="step">Вопрос '+(i+1)+' из '+QUESTIONS.length+'</div>';
+  h+='<p class="q">'+(i+1)+'. '+q.label+'</p>';
+  if(q.hint){h+='<div class="hint">'+q.hint+'</div>';}
+  if(q.type==="choice"||q.type==="multi"){
+    var multi=q.type==="multi";
+    h+='<div class="opts'+(q.key==="level"?' one':'')+'">';
+    q.opts.forEach(function(o,idx){
+      var on=multi?(data[q.key]||[]).indexOf(o)>-1:data[q.key]===o;
+      var wide=(q.opts.length%2===1&&idx===q.opts.length-1)?' wide':'';
+      var pre=q.key==="level"?"абв".charAt(idx)+") ":"";
+      h+='<button class="opt'+(multi?' chk':'')+(on?' on':'')+wide+'" data-v="'+o+'">'+pre+o+'</button>';
+    });
+    h+='</div>';
+  }else{
+    h+='<input id="in" type="'+q.type+'" placeholder="'+q.ph+'" '+(q.type==="number"?'inputmode="numeric"':'autocomplete="off"')+' value="'+(data[q.key]||"")+'">';
+  }
+  h+='<div class="err" id="err"></div>';
+  h+='<button class="btn" id="next">'+(i===QUESTIONS.length-1?'ГОТОВО':'ДАЛЕЕ')+'</button>';
+  h+='<div class="bar"><b style="width:'+(i/QUESTIONS.length*100)+'%"></b></div>';
+  sys.innerHTML=h;
+  var bars=sys.querySelector(".bar b");
+  setTimeout(function(){bars.style.width=((i+1)/QUESTIONS.length*100)+"%";},30);
+  var inp=document.getElementById("in");
+  if(inp){inp.addEventListener("keydown",function(e){if(e.key==="Enter")next();});}
+  Array.prototype.forEach.call(sys.querySelectorAll(".opt"),function(b){
+    b.onclick=function(){
+      var v=b.getAttribute("data-v");
+      if(q.type==="multi"){
+        var arr=(data[q.key]||[]).slice(),p=arr.indexOf(v);
+        if(p>-1){arr.splice(p,1);}
+        else{
+          if(v==="Всё тело"){arr=[];}
+          else{var a=arr.indexOf("Всё тело");if(a>-1){arr.splice(a,1);}}
+          arr.push(v);
+        }
+        arr.sort(function(x,y){return q.opts.indexOf(x)-q.opts.indexOf(y);});
+        data[q.key]=arr;
+      }else{data[q.key]=v;}
+      render();
+    };
+  });
+  document.getElementById("next").onclick=next;
+}
+
+function next(){
+  var q=QUESTIONS[i],err=document.getElementById("err");
+  if(q.type==="multi"){
+    if(!data[q.key]||!data[q.key].length){err.textContent="Выберите хотя бы один вариант.";return;}
+  }else if(q.type==="choice"){
+    if(!data[q.key]){err.textContent="Выберите один вариант.";return;}
+  }else{
+    var v=document.getElementById("in").value.trim();
+    if(!v){err.textContent="Ответьте на вопрос.";return;}
+    if(q.type==="number"){
+      var n=Number(v);
+      if(isNaN(n)||n<q.min||n>q.max){err.textContent="Введите число от "+q.min+" до "+q.max+".";return;}
+    }
+    data[q.key]=v;
+  }
+  if(i<QUESTIONS.length-1){i++;render();}else{finish();}
+}
+
+function finish(){
+  data.difficulty=LEVELS[data.level];
+  try{localStorage.setItem("spu_profile",JSON.stringify(data));}catch(e){}
+  var h=head()+'<p class="q">Данные приняты, '+data.name+'.</p><ul class="list">';
+  Object.keys(LABELS).forEach(function(k){
+    var val=Array.isArray(data[k])?data[k].join(", "):data[k];
+    h+='<li><span>'+LABELS[k]+'</span><b>'+val+(k==="weight"?" кг":k==="height"?" см":"")+'</b></li>';
+  });
+  h+='</ul><button class="btn" id="go">ДАЛЕЕ</button>';
+  sys.innerHTML=h;
+  document.getElementById("go").onclick=function(){state=newState();save();showMain();};
+}
+
+var DAYS=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+var STATS=[["str","СИЛА"],["int","УМ"],["end","ВЫНОСЛИВОСТЬ"],["def","ЗАЩИТА (КРЕПКОСТЬ)"],["spd","СКОРОСТЬ"],["disc","ДИСЦИПЛИНА"]];
+var XPGAIN={"Лёгкие":20,"Средние":35,"Тяжёлые":50};
+var state=null;
+
+function pad(n){return n<10?"0"+n:""+n;}
+function dkey(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function newState(){return {lvl:1,xp:0,stats:{str:0,int:0,end:0,def:0,spd:0,disc:0},v:2,done:[],read:[],prog:null,start:dkey(new Date())};}
+function save(){try{localStorage.setItem("spu_state",JSON.stringify(state));}catch(e){}}
+function need(l){return 100+(l-1)*50;}
+function rank(l){return l>=25?"S":l>=20?"A":l>=15?"B":l>=10?"C":l>=5?"D":"E";}
+function isTrainingDay(d){return data.days.indexOf(DAYS[d.getDay()])>-1;}
+
+function loadSaved(){
+  try{
+    var p=localStorage.getItem("spu_profile");
+    if(!p){return false;}
+    data=JSON.parse(p);
+    var s=localStorage.getItem("spu_state");
+    state=s?JSON.parse(s):newState();
+    if(!state.v||state.v<2){state=newState();s=null;}
+    if(!s){save();}
+    return true;
+  }catch(e){return false;}
+}
+
+function showMain(){
+  var n=need(state.lvl),pct=Math.min(100,state.xp/n*100),h=head();
+  h+='<div class="hero"><span style="border:0;box-shadow:none;padding:0;font-size:24px;color:#fff">'+data.name.toUpperCase()+'</span><span>РАНГ '+rank(state.lvl)+'</span></div>';
+  h+='<div class="lvl"><i></i><span>LVL - '+state.lvl+'</span><i></i></div>';
+  h+='<div class="xpbar"><b style="width:'+pct+'%"></b></div><div class="xpn">'+state.xp+'/'+n+'</div>';
+  h+='<ul class="list">';
+  STATS.forEach(function(s){
+    if(s[0]==="int"&&data.mind!=="ДА"){return;}
+    h+='<li><span>'+s[1]+'</span><b>'+state.stats[s[0]]+'</b></li>';
+  });
+  h+='</ul><button class="btn" id="quest">ЕЖЕДНЕВНЫЙ КВЕСТ</button>';
+  h+='<button class="link" id="reset">СБРОСИТЬ ВСЁ</button>';
+  sys.innerHTML=h;
+  document.getElementById("quest").onclick=function(){showQuest();};
+  var rs=document.getElementById("reset"),armed=false;
+  rs.onclick=function(){
+    if(!armed){armed=true;rs.textContent="ТОЧНО? НАЖМИ ЕЩЁ РАЗ";return;}
+    try{localStorage.removeItem("spu_profile");localStorage.removeItem("spu_state");}catch(e){}
+    i=0;data={};state=null;render();
+  };
+}
+
+var SCHEME={"Лёгкие":{s:3,r:10,t:30},"Средние":{s:4,r:12,t:60},"Тяжёлые":{s:5,r:15,t:90}};
+var BANK={
+  "Грудь":[["Отжимания",0],["Жим гантелей лёжа",0],["Разводка гантелей",0],["Отжимания на брусьях",0]],
+  "Спина":[["Подтягивания",0],["Тяга гантели в наклоне",0],["Гиперэкстензия",0],["Тяга верхнего блока",0]],
+  "Ноги":[["Приседания",0],["Выпады",0],["Румынская тяга",0],["Подъём на носки",0]],
+  "Руки":[["Подъём гантелей на бицепс",0],["Французский жим",0],["Молотковые сгибания",0],["Обратные отжимания от скамьи",0]],
+  "Плечи":[["Жим гантелей сидя",0],["Махи гантелей в стороны",0],["Махи в наклоне",0],["Тяга к подбородку",0]],
+  "Пресс":[["Скручивания",0],["Подъём ног лёжа",0],["Планка",1],["Велосипед",0]],
+  "Всё тело":[["Приседания",0],["Отжимания",0],["Подтягивания",0],["Жим гантелей сидя",0],["Выпады",0],["Планка",1]]
+};
+var shownAt=0;
+
+var TIMES={"Лёгкие":120,"Средние":180,"Тяжёлые":240},BOOKTIME=900;
+var camStream=null,runId=null,camMsg="",lastTick=0,saveCnt=0;
+
+function questTasks(){
+  var sc=SCHEME[data.difficulty],src=[],list=[],dur=TIMES[data.difficulty];
+  if(data.parts.indexOf("Всё тело")>-1){src=BANK["Всё тело"];}
+  else{
+    var per=data.parts.length<=2?3:2;
+    data.parts.forEach(function(p){src=src.concat(BANK[p].slice(0,per));});
+  }
+  src.forEach(function(e,idx){
+    list.push({id:"e"+idx,dur:dur,text:e[0]+" — "+(e[1]?sc.s+"×"+sc.t+" сек":sc.s+"×"+sc.r)});
+  });
+  if(data.mind==="ДА"){list.push({id:"book",dur:BOOKTIME,text:"Прочитать книгу — 20 страниц"});}
+  return list;
+}
+
+function getProg(){
+  var k=dkey(new Date());
+  if(!state.prog||state.prog.d!==k||state.prog.v!==3){state.prog={v:3,d:k,c:[],t:{}};}
+  return state.prog;
+}
+
+function camLive(){
+  if(!camStream){return false;}
+  var tr=camStream.getVideoTracks();
+  return tr.length>0&&tr.every(function(t){return t.readyState==="live"&&t.enabled&&!t.muted;});
+}
+function stopCam(){
+  if(camStream){camStream.getTracks().forEach(function(t){t.stop();});}
+  camStream=null;
+}
+function fmt(sec){sec=Math.max(0,Math.ceil(sec));return pad(Math.floor(sec/60))+":"+pad(sec%60);}
+
+function startCam(){
+  camMsg="";
+  if(camLive()){return Promise.resolve(true);}
+  stopCam();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    camMsg="Камера недоступна: страница открыта не по защищённой ссылке (https). Код: NO_API";
+    return Promise.resolve(false);
+  }
+  return navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}).then(function(s){
+    camStream=s;
+    return true;
+  }).catch(function(e){
+    var n=(e&&e.name)||"unknown";
+    var m="Камера не включилась. Код: "+n+".";
+    if(location.protocol==="file:"||location.protocol==="content:"){m+=" Файл открыт локально, Chrome на телефоне так камеру не даёт. Нужна https-ссылка.";}
+    else if(n==="NotAllowedError"||n==="SecurityError"){m+=" Доступ к камере запрещён в этом окне или в настройках сайта.";}
+    else if(n==="NotFoundError"){m+=" Камера не найдена.";}
+    else if(n==="NotReadableError"){m+=" Камеру занимает другое приложение.";}
+    camMsg=m;
+    return false;
+  });
+}
+
+function startTask(id){
+  startCam().then(function(ok){
+    if(ok){runId=id;lastTick=Date.now();}
+    showQuest();
+  });
+}
+
+function setTimer(left,why){
+  var tm=document.getElementById("tm"),st=document.getElementById("st"),cb=document.getElementById("camBtn");
+  if(tm){tm.textContent=fmt(left);}
+  if(st){st.textContent=why||"Идёт. Камера включена.";st.className="stt"+(why?" bad":"");}
+  if(cb){cb.style.display=camLive()?"none":"block";}
+}
+
+function tick(){
+  var now=Date.now(),dt=Math.min(now-lastTick,1500)/1000;
+  lastTick=now;
+  if(!runId||!document.getElementById("tm")){return;}
+  var t=questTasks().filter(function(x){return x.id===runId;})[0];
+  if(!t){runId=null;return;}
+  var pr=getProg(),why="";
+  if(document.visibilityState!=="visible"){why="Приложение свёрнуто. Время стоит.";}
+  else if(!camLive()){why="Камера выключена. Время стоит.";}
+  if(!why){
+    pr.t[runId]=(pr.t[runId]||0)+dt;
+    saveCnt++;
+    if(saveCnt%5===0){save();}
+  }
+  var left=t.dur-(pr.t[runId]||0);
+  if(left<=0){pr.t[runId]=t.dur;runId=null;save();showQuest();return;}
+  setTimer(left,why);
+}
+
+function leaveQuest(){
+  runId=null;stopCam();save();showMain();
+}
+
+function showQuest(result){
+  var now=new Date(),h=head();
+  shownAt=Date.now();
+  if(!isTrainingDay(now)){
+    h+='<p class="q">ДЕНЬ ОТДЫХА</p><p class="note">Сегодня '+DAYS[now.getDay()].toLowerCase()+', тренировки нет. Восстанавливайся.</p>';
+    h+='<button class="link" id="back">НАЗАД</button>';
+    sys.innerHTML=h;
+    document.getElementById("back").onclick=function(){showMain();};
+    return;
+  }
+  if(camStream&&!camLive()&&!runId){stopCam();}
+  var done=state.done.indexOf(dkey(now))>-1,tasks=questTasks(),pr=getProg(),cur=-1,ok=0;
+  tasks.forEach(function(t,idx){
+    var on=done||pr.c.indexOf(t.id)>-1;
+    if(on){ok++;}else if(cur<0){cur=idx;}
+  });
+  var all=ok===tasks.length;
+  var rt=runId?tasks.filter(function(x){return x.id===runId;})[0]:null;
+  h+='<p class="q">ЕЖЕДНЕВНЫЙ КВЕСТ</p><ul class="list">'+
+    '<li><span>Тренировка</span><b>'+data.parts.join(", ")+'</b></li>'+
+    '<li><span>Сложность</span><b>'+data.difficulty+'</b></li>'+
+    '<li><span>Награда</span><b>+'+XPGAIN[data.difficulty]+' XP</b></li></ul>';
+  if(camStream&&!done){
+    var left=rt?rt.dur-(pr.t[rt.id]||0):0;
+    h+='<div class="camrow"><video id="cam" autoplay muted playsinline></video><div><div class="tm" id="tm">'+(rt?fmt(left):'')+'</div><div class="stt" id="st">'+(rt?'':'Камера включена. Нажми НАЧАТЬ.')+'</div><button class="go" id="camBtn" style="display:none">ВКЛЮЧИТЬ КАМЕРУ</button></div></div>';
+  }
+  tasks.forEach(function(t,idx){
+    var el=pr.t[t.id]||0,on=done||pr.c.indexOf(t.id)>-1;
+    if(on){
+      h+='<div class="trow on"><span class="bx">✔</span><div class="tx">'+t.text+'<small>'+fmt(t.dur)+'</small></div></div>';
+    }else if(idx>cur){
+      h+='<div class="trow lock"><span class="bx"></span><div class="tx">'+t.text+'<small>Таймер '+fmt(t.dur)+'</small></div></div>';
+    }else if(el>=t.dur-0.01){
+      h+='<div class="trow ready"><button class="bx" data-check="'+t.id+'"></button><div class="tx">'+t.text+'<small>Время вышло. Поставь галочку.</small></div></div>';
+    }else{
+      var run=runId===t.id;
+      h+='<div class="trow"><span class="bx"></span><div class="tx">'+t.text+'<small>'+(run?'Идёт…':(el>0?'Осталось '+fmt(t.dur-el):'Таймер '+fmt(t.dur)))+'</small></div>'+
+        (run?'':'<button class="go" data-start="'+t.id+'">'+(el>0?'ПРОДОЛЖИТЬ':'НАЧАТЬ')+'</button>')+'</div>';
+    }
+  });
+  var msg=camMsg?camMsg:((!done&&!all)?'Задания по порядку. Таймер идёт только при включённой камере.':'');
+  h+='<p class="note" style="min-height:22px;margin-top:4px'+(camMsg?';color:#ff9ab0;opacity:1':'')+'">'+msg+'</p>';
+  if(result){h+='<p class="gain">'+result+'</p>';}
+  h+=done?'<button class="btn off" disabled>СЕГОДНЯ ВЫПОЛНЕНО</button>':'<button class="btn'+(all?'':' off')+'" id="finishq"'+(all?'':' disabled')+'>КВЕСТ ВЫПОЛНЕН</button>';
+  h+='<button class="link" id="back">НАЗАД</button>';
+  sys.innerHTML=h;
+  var v=document.getElementById("cam");
+  if(v&&camStream){v.srcObject=camStream;var pl=v.play();if(pl&&pl.catch){pl.catch(function(){});}}
+  if(rt){setTimer(rt.dur-(pr.t[rt.id]||0),camLive()?"":"Камера выключена. Время стоит.");}
+  Array.prototype.forEach.call(sys.querySelectorAll("[data-start]"),function(b){
+    b.onclick=function(){startTask(b.getAttribute("data-start"));};
+  });
+  Array.prototype.forEach.call(sys.querySelectorAll("[data-check]"),function(b){
+    b.onclick=function(){
+      var id=b.getAttribute("data-check"),p=getProg(),tk=questTasks().filter(function(x){return x.id===id;})[0];
+      if(!tk||(p.t[id]||0)<tk.dur-0.5||p.c.indexOf(id)>-1){return;}
+      p.c.push(id);
+      save();
+      showQuest();
+    };
+  });
+  var cb=document.getElementById("camBtn");
+  if(cb){cb.onclick=function(){startCam().then(function(){showQuest();});};}
+  var fq=document.getElementById("finishq");
+  if(fq){fq.onclick=completeQuest;}
+  document.getElementById("back").onclick=leaveQuest;
+}
+
+function completeQuest(){
+  if(Date.now()-shownAt<700){return;}
+  var now=new Date(),k=dkey(now);
+  if(!isTrainingDay(now)||state.done.indexOf(k)>-1){return;}
+  var tasks=questTasks(),pr=getProg();
+  for(var n=0;n<tasks.length;n++){
+    if(pr.c.indexOf(tasks[n].id)<0||(pr.t[tasks[n].id]||0)<tasks[n].dur-0.5){return;}
+  }
+  runId=null;stopCam();
+  var disc=true,d=new Date(now);
+  for(var c=0;c<7;c++){
+    d.setDate(d.getDate()-1);
+    if(dkey(d)<state.start){break;}
+    if(isTrainingDay(d)){disc=state.done.indexOf(dkey(d))>-1;break;}
+  }
+  var g=XPGAIN[data.difficulty];
+  state.done.push(k);
+  state.xp+=g;state.stats.str+=1;state.stats.end+=1;
+  var msg="+"+g+" XP, СИЛА +1, ВЫНОСЛИВОСТЬ +1";
+  if(data.mind==="ДА"){state.stats.int+=1;msg+=", УМ +1";}
+  if(disc){state.stats.disc+=1;msg+=", ДИСЦИПЛИНА +1";}
+  var up=false;
+  while(state.xp>=need(state.lvl)){state.xp-=need(state.lvl);state.lvl+=1;up=true;}
+  if(up){msg+=". УРОВЕНЬ ПОВЫШЕН: LVL - "+state.lvl;}
+  save();
+  showQuest(msg);
+}
+
+function askMind(){
+  var h=head()+'<p class="q">Качаем ум? Чтение книг?</p><div class="hint" style="margin:0 0 12px">Если пропустить, УМ уберём из статистики</div><div class="opts"><button class="opt" data-v="ДА">ДА</button><button class="opt" data-v="ПРОПУСТИТЬ">ПРОПУСТИТЬ</button></div>';
+  sys.innerHTML=h;
+  Array.prototype.forEach.call(sys.querySelectorAll(".opt"),function(b){
+    b.onclick=function(){
+      data.mind=b.getAttribute("data-v");
+      try{localStorage.setItem("spu_profile",JSON.stringify(data));}catch(e){}
+      showMain();
+    };
+  });
+}
+
+lastTick=Date.now();
+setInterval(tick,1000);
+if(loadSaved()){if(data.mind){showMain();}else{askMind();}}else{render();}
+</script>
+</body>
+</html>
