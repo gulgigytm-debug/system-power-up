@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SYSTEM POWER UP</title>
+<style>
+:root{
+  --bg:#06050c; --violet:#7b2cff; --blue:#3a8dff; --ice:#bfe0ff; --panel:rgba(10,24,64,.78);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  margin:0;height:100%;min-height:100%;background:var(--bg);color:var(--ice);
+  font-family:"Rajdhani","Segoe UI",Roboto,Arial,sans-serif;
+  display:flex;overflow-y:auto;position:relative;
+}
+/* фиолетовые углы */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(123,44,255,.55),transparent 42%),
+    radial-gradient(circle at 100% 0%,rgba(123,44,255,.45),transparent 40%),
+    radial-gradient(circle at 0% 100%,rgba(123,44,255,.45),transparent 40%),
+    radial-gradient(circle at 100% 100%,rgba(123,44,255,.55),transparent 42%);
+}
+.wrap{width:100%;max-width:420px;padding:20px;position:relative;z-index:1;margin:auto}
+.sys{
+  position:relative;background:var(--panel);border:2px solid var(--blue);
+  box-shadow:0 0 22px rgba(58,141,255,.55),inset 0 0 28px rgba(58,141,255,.18);
+  backdrop-filter:blur(3px);padding:22px 20px 20px;
+  animation:open .55s cubic-bezier(.2,.9,.3,1.2) both;
+}
+@keyframes open{0%{opacity:0;transform:scale(.55) scaleY(.1)}60%{opacity:1;transform:scale(1.03) scaleY(1)}100%{transform:scale(1)}}
+.sys::before,.sys::after{content:"";position:absolute;width:16px;height:16px;border:3px solid var(--ice)}
+.sys::before{top:-5px;left:-5px;border-right:0;border-bottom:0}
+.sys::after{bottom:-5px;right:-5px;border-left:0;border-top:0}
+.title{
+  text-align:center;font-size:22px;font-weight:700;letter-spacing:.35em;color:#fff;
+  text-shadow:0 0 10px var(--blue);padding:4px 0 14px;margin-bottom:16px;
+  border-bottom:1px solid rgba(191,224,255,.35);
+}
+.title i{font-style:normal;opacity:.5;margin:0 .35em}
+.step{font-size:14px;letter-spacing:.12em;opacity:.7;margin-bottom:6px}
+.q{font-size:21px;line-height:1.3;color:#fff;margin:0 0 16px;font-weight:600}
+input[type=text],input[type=number]{
+  width:100%;background:rgba(4,10,30,.7);border:1px solid var(--blue);color:#fff;
+  font:inherit;font-size:20px;padding:13px 14px;outline:none;border-radius:0;
+}
+input:focus{box-shadow:0 0 12px rgba(58,141,255,.8)}
+input::placeholder{color:rgba(191,224,255,.4)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{
+  background:rgba(4,10,30,.7);border:1px solid rgba(58,141,255,.6);color:var(--ice);
+  font:inherit;font-size:18px;padding:13px 6px;cursor:pointer;
+}
+.opt.on{background:var(--blue);color:#04122e;border-color:#fff;box-shadow:0 0 14px var(--blue);font-weight:700}
+.opts.one{grid-template-columns:1fr}
+.opt.wide{grid-column:1/-1}
+.chk::before{content:"☐ "}
+.chk.on::before{content:"☑ "}
+.hint{font-size:14px;opacity:.65;margin:-8px 0 12px}
+.err{min-height:20px;margin:8px 0 0;font-size:15px;color:#ff7a9a}
+.btn{
+  display:block;width:100%;margin-top:10px;padding:14px;font:inherit;font-size:19px;font-weight:700;
+  letter-spacing:.2em;color:#fff;background:linear-gradient(90deg,#4a1fb8,var(--violet));
+  border:1px solid #c9a6ff;box-shadow:0 0 16px rgba(123,44,255,.7);cursor:pointer;
+}
+.btn:active{transform:scale(.98)}
+.bar{height:4px;background:rgba(191,224,255,.15);margin-top:16px}
+.bar b{display:block;height:100%;width:0;background:var(--blue);box-shadow:0 0 8px var(--blue);transition:width .3s}
+.list{margin:0 0 6px;padding:0;list-style:none;font-size:19px}
+.list li{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(191,224,255,.2)}
+.list span{opacity:.65}
+.list b{color:#fff;text-align:right}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;letter-spacing:.08em}
+.hero span{font-size:17px;color:var(--ice);border:1px solid var(--blue);padding:2px 10px;box-shadow:0 0 10px rgba(58,141,255,.5);white-space:nowrap}
+.lvl{display:flex;align-items:center;gap:12px;margin:4px 0 12px;font-size:26px;font-weight:700;color:#fff;text-shadow:0 0 10px var(--blue);white-space:nowrap}
+.lvl i{flex:1;height:1px;background:rgba(191,224,255,.45)}
+.xpbar{height:12px;background:rgba(191,224,255,.12);border:1px solid rgba(58,141,255,.6)}
+.xpbar b{display:block;height:100%;background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.xpn{text-align:right;font-size:14px;opacity:.7;margin:4px 0 14px}
+.note{font-size:16px;opacity:.75;margin:0 0 12px}
+.gain{font-size:16px;color:#8dffb5;margin:0 0 12px}
+.link{display:block;width:100%;margin-top:10px;padding:10px;background:none;border:0;color:var(--ice);opacity:.7;font:inherit;font-size:15px;letter-spacing:.15em;cursor:pointer}
+.btn.off{background:rgba(58,141,255,.2);box-shadow:none;border-color:rgba(191,224,255,.3);opacity:.7}
+.task{display:block;width:100%;text-align:left;margin-bottom:8px;font-size:17px;padding:11px 12px}
+.opt:disabled{cursor:default}
+.trow{display:flex;align-items:center;gap:10px;border:1px solid rgba(58,141,255,.6);background:rgba(4,10,30,.7);padding:10px 12px;margin-bottom:8px}
+.trow.lock{opacity:.4;border-color:rgba(191,224,255,.25)}
+.trow.on{background:var(--blue);color:#04122e;border-color:#fff;box-shadow:0 0 14px var(--blue)}
+.trow.ready{border-color:#fff;box-shadow:0 0 14px rgba(58,141,255,.8)}
+.tx{flex:1;font-size:17px;line-height:1.2}
+.tx small{display:block;font-size:13px;opacity:.7;margin-top:3px}
+.bx{width:28px;height:28px;border:2px solid var(--ice);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex:none;background:none;color:inherit;font-family:inherit;padding:0;border-radius:0}
+.trow.lock .bx,.trow:not(.ready):not(.on) .bx{border-color:rgba(191,224,255,.35)}
+.trow.ready .bx{border-color:#fff;box-shadow:0 0 10px var(--blue);cursor:pointer}
+.trow.on .bx{border-color:#04122e}
+.go{font:inherit;font-size:14px;font-weight:700;letter-spacing:.1em;color:#fff;background:linear-gradient(90deg,#4a1fb8,var(--violet));border:1px solid #c9a6ff;padding:9px 10px;cursor:pointer;flex:none}
+.camrow{display:flex;gap:14px;align-items:center;margin:0 0 12px}
+.camwrap{position:relative;width:120px;aspect-ratio:3/4;flex:none;border:2px solid var(--blue);box-shadow:0 0 12px rgba(58,141,255,.6);background:#000;overflow:hidden}
+#cam{display:block;width:100%;height:100%;object-fit:fill;transform:scaleX(-1)}
+#ov{position:absolute;left:0;top:0;width:100%;height:100%;transform:scaleX(-1);pointer-events:none}
+.tip{font-size:13px;opacity:.7;margin:0 0 8px;line-height:1.25}
+.tm{font-size:40px;font-weight:700;color:#fff;text-shadow:0 0 10px var(--blue);line-height:1}
+.stt{font-size:15px;opacity:.85;margin:4px 0 8px}
+.stt.bad{color:#ff9ab0;opacity:1}
+.btn.alt{background:rgba(4,10,30,.7);border-color:var(--blue);box-shadow:none}
+@media (prefers-reduced-motion:reduce){.sys{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="sys" id="sys"></div></div>
+
+<script>
+var QUESTIONS=[
+  {key:"name",label:"Как вас зовут?",type:"text",ph:"Введите имя"},
+  {key:"age",label:"Сколько вам лет?",type:"number",ph:"Например, 20",min:10,max:99},
+  {key:"weight",label:"Какой у вас вес? (кг)",type:"number",ph:"Например, 75",min:30,max:300},
+  {key:"height",label:"Какой у вас рост? (см)",type:"number",ph:"Например, 175",min:100,max:250},
+  {key:"days",label:"В какие дни тренируетесь?",type:"multi",hint:"Можно выбрать несколько",opts:["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"]},
+  {key:"mind",label:"Качаем ум? Чтение книг?",type:"choice",hint:"Если пропустить, УМ уберём из статистики",opts:["ДА","ПРОПУСТИТЬ"]},
+  {key:"level",label:"Какой у вас уровень подготовки?",type:"choice",hint:"От этого зависит сложность квестов",opts:["Не тренировался","Уже есть опыт","Профессионал"]}
+];
+var LABELS={name:"Имя",age:"Возраст",weight:"Вес",height:"Рост",mind:"Читаем книги",level:"Уровень",difficulty:"Квесты"};
+var LEVELS={"Не тренировался":"Лёгкие","Уже есть опыт":"Средние","Профессионал":"Тяжёлые"};
+var i=0,data={},sys=document.getElementById("sys");
+
+function head(){return '<div class="title">SYSTEM</div>';}
+
+function render(){
+  var q=QUESTIONS[i],h=head();
+  h+='<div class="step">Вопрос '+(i+1)+' из '+QUESTIONS.length+'</div>';
+  h+='<p class="q">'+(i+1)+'. '+q.label+'</p>';
+  if(q.hint){h+='<div class="hint">'+q.hint+'</div>';}
+  if(q.type==="choice"||q.type==="multi"){
+    var multi=q.type==="multi";
+    h+='<div class="opts'+(q.key==="level"?' one':'')+'">';
+    q.opts.forEach(function(o,idx){
+      var on=multi?(data[q.key]||[]).indexOf(o)>-1:data[q.key]===o;
+      var wide=(q.opts.length%2===1&&idx===q.opts.length-1)?' wide':'';
+      var pre=q.key==="level"?"абв".charAt(idx)+") ":"";
+      h+='<button class="opt'+(multi?' chk':'')+(on?' on':'')+wide+'" data-v="'+o+'">'+pre+o+'</button>';
+    });
+    h+='</div>';
+  }else{
+    h+='<input id="in" type="'+q.type+'" placeholder="'+q.ph+'" '+(q.type==="number"?'inputmode="numeric"':'autocomplete="off"')+' value="'+(data[q.key]||"")+'">';
+  }
+  h+='<div class="err" id="err"></div>';
+  h+='<button class="btn" id="next">'+(i===QUESTIONS.length-1?'ГОТОВО':'ДАЛЕЕ')+'</button>';
+  h+='<div class="bar"><b style="width:'+(i/QUESTIONS.length*100)+'%"></b></div>';
+  sys.innerHTML=h;
+  var bars=sys.querySelector(".bar b");
+  setTimeout(function(){bars.style.width=((i+1)/QUESTIONS.length*100)+"%";},30);
+  var inp=document.getElementById("in");
+  if(inp){inp.addEventListener("keydown",function(e){if(e.key==="Enter")next();});}
+  Array.prototype.forEach.call(sys.querySelectorAll(".opt"),function(b){
+    b.onclick=function(){
+      var v=b.getAttribute("data-v");
+      if(q.type==="multi"){
+        var arr=(data[q.key]||[]).slice(),p=arr.indexOf(v);
+        if(p>-1){arr.splice(p,1);}
+        else{
+          if(v==="Всё тело"){arr=[];}
+          else{var a=arr.indexOf("Всё тело");if(a>-1){arr.splice(a,1);}}
+          arr.push(v);
+        }
+        arr.sort(function(x,y){return q.opts.indexOf(x)-q.opts.indexOf(y);});
+        data[q.key]=arr;
+      }else{data[q.key]=v;}
+      render();
+    };
+  });
+  document.getElementById("next").onclick=next;
+}
+
+function next(){
+  var q=QUESTIONS[i],err=document.getElementById("err");
+  if(q.type==="multi"){
+    if(!data[q.key]||!data[q.key].length){err.textContent="Выберите хотя бы один вариант.";return;}
+  }else if(q.type==="choice"){
+    if(!data[q.key]){err.textContent="Выберите один вариант.";return;}
+  }else{
+    var v=document.getElementById("in").value.trim();
+    if(!v){err.textContent="Ответьте на вопрос.";return;}
+    if(q.type==="number"){
+      var n=Number(v);
+      if(isNaN(n)||n<q.min||n>q.max){err.textContent="Введите число от "+q.min+" до "+q.max+".";return;}
+    }
+    data[q.key]=v;
+  }
+  if(q.key==="days"){addModeQ();}
+  if(q.key==="mode"){addDayQs();}
+  if(i<QUESTIONS.length-1){i++;render();}else{finish();}
+}
+
+var PARTS=["Грудь","Спина","Ноги","Руки","Плечи","Пресс","Всё тело"];
+var AUTO=[["Грудь","Руки"],["Спина","Плечи"],["Ноги","Пресс"]];
+
+function qIndex(key){
+  for(var n=0;n<QUESTIONS.length;n++){if(QUESTIONS[n].key===key){return n;}}
+  return -1;
+}
+function addModeQ(){
+  if(qIndex("mode")<0){
+    QUESTIONS.splice(qIndex("days")+1,0,{key:"mode",label:"Как составим план по дням?",type:"choice",hint:"Авто-план сам распределит части тела по дням",opts:["Авто-план","Выберу сам"]});
+  }
+}
+function addDayQs(){
+  QUESTIONS=QUESTIONS.filter(function(x){return x.key.indexOf("plan:")!==0;});
+  if(data.mode!=="Выберу сам"){return;}
+  var adds=data.days.map(function(d){
+    return {key:"plan:"+d,label:d+": что качаем?",type:"multi",hint:"Можно выбрать несколько",opts:PARTS};
+  });
+  QUESTIONS.splice.apply(QUESTIONS,[qIndex("mode")+1,0].concat(adds));
+}
+function autoPlan(days){
+  var plan={},n=days.length;
+  days.forEach(function(d,idx){
+    if(n===1){plan[d]=["Всё тело"];}
+    else if(n===2){plan[d]=idx===0?["Грудь","Спина"]:["Ноги","Пресс"];}
+    else{plan[d]=AUTO[idx%3].slice();}
+  });
+  return plan;
+}
+function buildPlan(){
+  var plan={};
+  if(data.mode==="Выберу сам"){
+    data.days.forEach(function(d){plan[d]=data["plan:"+d]||["Всё тело"];delete data["plan:"+d];});
+  }else{plan=autoPlan(data.days);}
+  data.plan=plan;
+  var u=[];
+  Object.keys(plan).forEach(function(d){plan[d].forEach(function(p){if(u.indexOf(p)<0){u.push(p);}});});
+  data.parts=u;
+}
+function partsFor(d){
+  return (data.plan&&data.plan[DAYS[d.getDay()]])||data.parts||["Всё тело"];
+}
+function missingParts(){
+  var all=["Грудь","Спина","Ноги","Руки","Плечи","Пресс"];
+  if(data.parts.indexOf("Всё тело")>-1){return [];}
+  return all.filter(function(p){return data.parts.indexOf(p)<0;});
+}
+function showPlan(){
+  var h=head()+'<p class="q">ПЛАН НЕДЕЛИ</p><ul class="list">',td=DAYS[new Date().getDay()];
+  [1,2,3,4,5,6,0].forEach(function(n){
+    var d=DAYS[n],pl=data.plan&&data.plan[d];
+    h+='<li><span>'+d+(d===td?' •':'')+'</span><b>'+(pl?pl.join(", "):'отдых')+'</b></li>';
+  });
+  h+='</ul><button class="link" id="back">НАЗАД</button>';
+  sys.innerHTML=h;
+  document.getElementById("back").onclick=function(){showMain();};
+}
+
+function finish(){
+  buildPlan();
+  data.difficulty=LEVELS[data.level];
+  try{localStorage.setItem("spu_profile",JSON.stringify(data));}catch(e){}
+  var h=head()+'<p class="q">Данные приняты, '+data.name+'.</p><ul class="list">';
+  Object.keys(LABELS).forEach(function(k){
+    var val=Array.isArray(data[k])?data[k].join(", "):data[k];
+    h+='<li><span>'+LABELS[k]+'</span><b>'+val+(k==="weight"?" кг":k==="height"?" см":"")+'</b></li>';
+  });
+  data.days.forEach(function(d){h+='<li><span>'+d+'</span><b>'+data.plan[d].join(", ")+'</b></li>';});
+  var miss=missingParts();
+  h+='</ul>';
+  if(miss.length){h+='<p class="note">В плане нет: '+miss.join(", ")+'. Тело растёт ровно, когда качаешь всё.</p>';}
+  h+='<button class="btn" id="go">ДАЛЕЕ</button>';
+  sys.innerHTML=h;
+  document.getElementById("go").onclick=function(){state=newState();save();showMain();};
+}
+
+var DAYS=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+var STATS=[["str","СИЛА"],["int","УМ"],["end","ВЫНОСЛИВОСТЬ"],["def","ЗАЩИТА (КРЕПКОСТЬ)"],["spd","СКОРОСТЬ"],["disc","ДИСЦИПЛИНА"]];
+var XPGAIN={"Лёгкие":20,"Средние":35,"Тяжёлые":50};
+var state=null;
+
+function pad(n){return n<10?"0"+n:""+n;}
+function dkey(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function newState(){return {lvl:1,xp:0,stats:{str:0,int:0,end:0,def:0,spd:0,disc:0},v:2,done:[],read:[],prog:null,start:dkey(new Date())};}
+function save(){try{localStorage.setItem("spu_state",JSON.stringify(state));}catch(e){}}
+function need(l){return 100+(l-1)*50;}
+function rank(l){return l>=25?"S":l>=20?"A":l>=15?"B":l>=10?"C":l>=5?"D":"E";}
+function isTrainingDay(d){return data.days.indexOf(DAYS[d.getDay()])>-1;}
+
+function loadSaved(){
+  try{
+    var p=localStorage.getItem("spu_profile");
+    if(!p){return false;}
+    data=JSON.parse(p);
+    if(!data.plan){
+      data.plan={};
+      (data.days||[]).forEach(function(d){data.plan[d]=(data.parts||["Всё тело"]).slice();});
+      try{localStorage.setItem("spu_profile",JSON.stringify(data));}catch(e){}
+    }
+    var s=localStorage.getItem("spu_state");
+    state=s?JSON.parse(s):newState();
+    if(!state.v||state.v<2){state=newState();s=null;}
+    if(!s){save();}
+    return true;
+  }catch(e){return false;}
+}
+
+function showMain(){
+  var n=need(state.lvl),pct=Math.min(100,state.xp/n*100),h=head();
+  h+='<div class="hero"><span style="border:0;box-shadow:none;padding:0;font-size:24px;color:#fff">'+data.name.toUpperCase()+'</span><span>РАНГ '+rank(state.lvl)+'</span></div>';
+  h+='<div class="lvl"><i></i><span>LVL - '+state.lvl+'</span><i></i></div>';
+  h+='<div class="xpbar"><b style="width:'+pct+'%"></b></div><div class="xpn">'+state.xp+'/'+n+'</div>';
+  h+='<div class="note" style="margin:-6px 0 10px">Сегодня: '+(isTrainingDay(new Date())?partsFor(new Date()).join(", "):"день отдыха")+'</div>';
+  h+='<ul class="list">';
+  STATS.forEach(function(s){
+    if(s[0]==="int"&&data.mind!=="ДА"){return;}
+    h+='<li><span>'+s[1]+'</span><b>'+state.stats[s[0]]+'</b></li>';
+  });
+  h+='</ul><button class="btn" id="quest">ЕЖЕДНЕВНЫЙ КВЕСТ</button><button class="btn alt" id="plan">ПЛАН НЕДЕЛИ</button>';
+  h+='<button class="link" id="reset">СБРОСИТЬ ВСЁ</button>';
+  sys.innerHTML=h;
+  document.getElementById("quest").onclick=function(){showQuest();};
+  document.getElementById("plan").onclick=function(){showPlan();};
+  var rs=document.getElementById("reset"),armed=false;
+  rs.onclick=function(){
+    if(!armed){armed=true;rs.textContent="ТОЧНО? НАЖМИ ЕЩЁ РАЗ";return;}
+    try{localStorage.removeItem("spu_profile");localStorage.removeItem("spu_state");}catch(e){}
+    i=0;data={};state=null;render();
+  };
+}
+
+var SCHEME={"Лёгкие":{s:3,r:10,t:30},"Средние":{s:4,r:12,t:60},"Тяжёлые":{s:5,r:15,t:90}};
+var BANK={
+  "Грудь":{
+    "Лёгкие":[["Отжимания с колен","3×8"],["Отжимания руки на стуле","3×10"],["Отжимания с колен, руки шире плеч","3×8"],["Статика в упоре лёжа","3×20 сек"]],
+    "Средние":[["Классические отжимания","4×12"],["Узкие отжимания","4×10"],["Отжимания, ноги на стуле","4×10"],["Отжимания с паузой внизу","3×8"]],
+    "Тяжёлые":[["Алмазные отжимания","5×15"],["Отжимания с хлопком","5×8"],["Отжимания «лучник»","4×8 на сторону"],["Отжимания, ноги на стуле, с паузой","4×12"]]
+  },
+  "Спина":{
+    "Лёгкие":[["Супермен","3×12"],["Вис на турнике","3×20 сек"],["«Снежные ангелы» лёжа на животе","3×12"],["Негативные подтягивания (медленно вниз)","3×3"]],
+    "Средние":[["Подтягивания хватом сверху","4×6"],["Подтягивания обратным хватом","4×6"],["Подтягивания лопатками (из виса)","4×10"],["Супермен с паузой 3 сек","4×12"]],
+    "Тяжёлые":[["Подтягивания широким хватом","5×10"],["Подтягивания обратным хватом","5×10"],["Подтягивания с паузой наверху","4×8"],["Подтягивания с рюкзаком","4×8"]]
+  },
+  "Ноги":{
+    "Лёгкие":[["Приседания","3×12"],["Выпады на месте","3×8 на ногу"],["Ягодичный мостик","3×12"],["Подъём на носки","3×15"],["Стульчик у стены","3×20 сек"]],
+    "Средние":[["Приседания с паузой","4×12"],["Выпады назад","4×10 на ногу"],["Болгарские приседания (нога на стуле)","4×8 на ногу"],["Мостик на одной ноге","4×10 на ногу"],["Подъём на носки на одной ноге","4×12 на ногу"]],
+    "Тяжёлые":[["Приседания «пистолет» с опорой","4×6 на ногу"],["Прыжковые приседания","5×12"],["Болгарские приседания с рюкзаком","4×10 на ногу"],["Прыжки в выпаде","4×10 на ногу"],["Подъём на носки на одной ноге с рюкзаком","4×15 на ногу"]]
+  },
+  "Руки":{
+    "Лёгкие":[["Обратные отжимания от стула","3×8"],["Узкие отжимания с колен","3×8"],["Вис на турнике обратным хватом","3×15 сек"],["Сгибания рук с рюкзаком","3×12"]],
+    "Средние":[["Обратные отжимания от стула","4×12"],["Узкие отжимания","4×10"],["Подтягивания обратным хватом","4×5"],["Сгибания рук с рюкзаком","4×12"]],
+    "Тяжёлые":[["Обратные отжимания, ноги на втором стуле","5×12"],["Алмазные отжимания","5×12"],["Подтягивания обратным хватом","5×8"],["Сгибания рук с рюкзаком, медленно","4×12"]]
+  },
+  "Плечи":{
+    "Лёгкие":[["Махи в стороны с бутылками воды","3×15"],["Подъём рук перед собой с бутылками","3×12"],["Пайк-отжимания","3×6"],["Планка с касанием плеч","3×10 на сторону"]],
+    "Средние":[["Пайк-отжимания","4×10"],["Пайк-отжимания, ноги на стуле","4×8"],["Жим рюкзака над головой","4×12"],["Планка с касанием плеч","4×14 на сторону"]],
+    "Тяжёлые":[["Отжимания в стойке на руках у стены","5×5"],["Пайк-отжимания, ноги на стуле","5×10"],["Жим рюкзака над головой","5×12"],["Планка с касанием плеч","4×20 на сторону"]]
+  },
+  "Пресс":{
+    "Лёгкие":[["Скручивания","3×12"],["Подъём согнутых ног лёжа","3×10"],["Планка","3×20 сек"],["Велосипед","3×16"]],
+    "Средние":[["Скручивания с паузой","4×15"],["Подъём прямых ног лёжа","4×12"],["Планка","3×40 сек"],["Русские скручивания","4×20"],["Скалолаз","3×30 сек"]],
+    "Тяжёлые":[["Подъём ног в висе на турнике","4×10"],["V-подъёмы","4×15"],["Планка","3×60 сек"],["Скалолаз","4×30 сек"],["Русские скручивания","4×30"]]
+  },
+  "Всё тело":{
+    "Лёгкие":[["Приседания","3×12"],["Отжимания с колен","3×8"],["Вис на турнике","3×20 сек"],["Выпады на месте","3×8 на ногу"],["Супермен","3×12"],["Планка","3×20 сек"]],
+    "Средние":[["Приседания с паузой","4×12"],["Отжимания","4×12"],["Подтягивания","4×6"],["Выпады назад","4×10 на ногу"],["Пайк-отжимания","4×10"],["Планка","3×40 сек"]],
+    "Тяжёлые":[["Прыжковые приседания","5×12"],["Алмазные отжимания","5×12"],["Подтягивания широким хватом","5×10"],["Прыжки в выпаде","4×10 на ногу"],["Пайк-отжимания, ноги на стуле","5×10"],["Подъём ног в висе на турнике","4×10"]]
+  }
+};
+var shownAt=0;
+
+var TIMES={"Лёгкие":120,"Средние":180,"Тяжёлые":240},BOOKTIME=900;
+var camStream=null,runId=null,curT=null,camMsg="",lastTick=0,saveCnt=0;
+var pose=null,poseP=null,poseState="idle",seenAt=0,lastVT=-1,repPhase="up",lastRepAt=0;
+var MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+var MODEL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+var LINES=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+
+function detectorFor(name){
+  var n=name.toLowerCase();
+  if(/обратные отжим|пайк|стойк/.test(n)){return null;}
+  if(/отжиман/.test(n)){return "pushup";}
+  if(/присед|выпад/.test(n)){return "legs";}
+  if(/подтягив/.test(n)&&!/лопатк|негатив/.test(n)){return "pullup";}
+  return null;
+}
+
+function parseTask(e,df){
+  var m=e[1].match(/(\d+)×(\d+)/),det=detectorFor(e[0]);
+  if(det&&m&&e[1].indexOf("сек")<0){
+    var mult=/на ногу|на сторону/.test(e[1])?2:1;
+    return {kind:"reps",det:det,target:(+m[1])*(+m[2])*mult,upper:det==="pullup"};
+  }
+  return {kind:"time",dur:TIMES[df]};
+}
+function taskNeed(t){return t.kind==="reps"?t.target:t.dur;}
+
+function questTasks(){
+  var df=data.difficulty,src=[],list=[],pt=partsFor(new Date());
+  if(pt.indexOf("Всё тело")>-1){src=BANK["Всё тело"][df];}
+  else{
+    var per=pt.length===1?5:(pt.length===2?3:2);
+    pt.forEach(function(p){
+      BANK[p][df].slice(0,per).forEach(function(e){
+        if(!src.some(function(x){return x[0]===e[0];})){src.push(e);}
+      });
+    });
+  }
+  src.forEach(function(e,idx){
+    var inf=parseTask(e,df);
+    list.push({id:"e"+idx,kind:inf.kind,det:inf.det,target:inf.target,dur:inf.dur,upper:inf.upper,text:e[0]+" — "+e[1]});
+  });
+  if(data.mind==="ДА"){list.push({id:"book",kind:"time",dur:BOOKTIME,upper:true,text:"Прочитать книгу — 20 страниц"});}
+  return list;
+}
+
+function getProg(){
+  var k=dkey(new Date());
+  if(!state.prog||state.prog.d!==k||state.prog.v!==4){state.prog={v:4,d:k,c:[],t:{}};}
+  return state.prog;
+}
+
+function camLive(){
+  if(!camStream){return false;}
+  var tr=camStream.getVideoTracks();
+  return tr.length>0&&tr.every(function(t){return t.readyState==="live"&&t.enabled&&!t.muted;});
+}
+function stopCam(){
+  if(camStream){camStream.getTracks().forEach(function(t){t.stop();});}
+  camStream=null;
+}
+function fmt(sec){sec=Math.max(0,Math.ceil(sec));return pad(Math.floor(sec/60))+":"+pad(sec%60);}
+
+function startCam(){
+  camMsg="";
+  if(camLive()){return Promise.resolve(true);}
+  stopCam();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    camMsg="Камера недоступна: страница открыта не по защищённой ссылке (https). Код: NO_API";
+    return Promise.resolve(false);
+  }
+  return navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}).then(function(s){
+    camStream=s;
+    return true;
+  }).catch(function(e){
+    var n=(e&&e.name)||"unknown";
+    var m="Камера не включилась. Код: "+n+".";
+    if(location.protocol==="file:"||location.protocol==="content:"){m+=" Файл открыт локально, Chrome на телефоне так камеру не даёт. Нужна https-ссылка.";}
+    else if(n==="NotAllowedError"||n==="SecurityError"){m+=" Доступ к камере запрещён в этом окне или в настройках сайта.";}
+    else if(n==="NotFoundError"){m+=" Камера не найдена.";}
+    else if(n==="NotReadableError"){m+=" Камеру занимает другое приложение.";}
+    camMsg=m;
+    return false;
+  });
+}
+
+function loadPose(){
+  if(pose){return Promise.resolve(true);}
+  if(poseP){return poseP;}
+  poseState="loading";
+  poseP=import(MP+"/vision_bundle.mjs").then(function(m){
+    return m.FilesetResolver.forVisionTasks(MP+"/wasm").then(function(fs){
+      function make(dl){
+        return m.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:dl},runningMode:"VIDEO",numPoses:1});
+      }
+      return make("GPU").catch(function(){return make("CPU");});
+    });
+  }).then(function(p){
+    pose=p;poseState="ready";return true;
+  }).catch(function(){
+    poseState="error";poseP=null;
+    camMsg="Сканер не загрузился. Нужен интернет. Проверь связь и нажми НАЧАТЬ ещё раз.";
+    return false;
+  });
+  return poseP;
+}
+
+function startTask(id){
+  startCam().then(function(ok){
+    if(!ok){runId=null;showQuest();return;}
+    runId=id;lastTick=Date.now();seenAt=0;repPhase="up";lastRepAt=0;lastVT=-1;
+    showQuest();
+    loadPose().then(function(ok2){
+      if(!ok2){runId=null;}
+      showQuest();
+    });
+  });
+}
+
+function tipFor(t){
+  if(t.kind==="reps"){
+    if(t.det==="pullup"){return "Телефон спереди или сбоку. Видно голову, плечи и руки.";}
+    return "Телефон сбоку, на уровне пола, в 1,5–2 м. Видно всё тело.";
+  }
+  if(t.upper){return "Сядь так, чтобы были видны плечи.";}
+  return "Встань или ляг так, чтобы было видно всё тело.";
+}
+
+function whyNot(t){
+  var stop=t.kind==="reps"?"Счёт стоит.":"Время стоит.";
+  if(document.visibilityState!=="visible"){return "Приложение свёрнуто. "+stop;}
+  if(!camLive()){return "Камера выключена. "+stop;}
+  if(poseState!=="ready"){return "Загрузка сканера… "+stop;}
+  if(Date.now()-seenAt>1500){return "Тебя не видно в кадре. "+stop;}
+  return "";
+}
+
+function setStat(txt,why){
+  var tm=document.getElementById("tm"),st=document.getElementById("st"),cb=document.getElementById("camBtn");
+  if(tm){tm.textContent=txt;}
+  if(st){
+    st.textContent=why||(curT&&curT.kind==="reps"?"Сканер считает повторы.":"Идёт. Тебя видно.");
+    st.className="stt"+(why?" bad":"");
+  }
+  if(cb){cb.style.display=camLive()?"none":"block";}
+}
+
+function ang(a,b,c){
+  var r=Math.atan2(c.y-b.y,c.x-b.x)-Math.atan2(a.y-b.y,a.x-b.x);
+  var d=Math.abs(r*180/Math.PI);
+  return d>180?360-d:d;
+}
+function sideAng(l,i1,i2,i3,j1,j2,j3){
+  var vl=(l[i1].visibility+l[i2].visibility+l[i3].visibility)/3;
+  var vr=(l[j1].visibility+l[j2].visibility+l[j3].visibility)/3;
+  var useL=vl>=vr;
+  return useL?{a:ang(l[i1],l[i2],l[i3]),vis:vl}:{a:ang(l[j1],l[j2],l[j3]),vis:vr};
+}
+function bodyVisible(l,upper){
+  var ids=upper?[0,11,12]:[11,12,23,24,25,26],n=0;
+  ids.forEach(function(i){if(l[i]&&l[i].visibility>0.5){n++;}});
+  return n>=(upper?2:3);
+}
+
+function countRep(t,l){
+  var now=Date.now();
+  if(now-lastRepAt<600){return;}
+  var hit=false,e;
+  if(t.det==="pushup"){
+    e=sideAng(l,11,13,15,12,14,16);
+    if(e.vis<0.5){return;}
+    var sx=(l[11].x+l[12].x)/2,sy=(l[11].y+l[12].y)/2,hx=(l[23].x+l[24].x)/2,hy=(l[23].y+l[24].y)/2;
+    if(Math.abs(sy-hy)>Math.abs(sx-hx)){return;}
+    if(repPhase==="up"&&e.a<105){repPhase="down";}
+    else if(repPhase==="down"&&e.a>150){repPhase="up";hit=true;}
+  }else if(t.det==="legs"){
+    var ks=[];
+    [[23,25,27],[24,26,28]].forEach(function(s){
+      var vv=(l[s[0]].visibility+l[s[1]].visibility+l[s[2]].visibility)/3;
+      if(vv>0.45){ks.push(ang(l[s[0]],l[s[1]],l[s[2]]));}
+    });
+    if(!ks.length){return;}
+    var mn=Math.min.apply(null,ks),mx=Math.max.apply(null,ks);
+    if(repPhase==="up"&&mn<105){repPhase="down";}
+    else if(repPhase==="down"&&mx>160){repPhase="up";hit=true;}
+  }else if(t.det==="pullup"){
+    e=sideAng(l,11,13,15,12,14,16);
+    var wv=(l[15].visibility+l[16].visibility)/2;
+    if(wv<0.4||e.vis<0.5){return;}
+    var wy=(l[15].y+l[16].y)/2;
+    if(repPhase==="up"&&l[0].y<wy+0.03&&e.a<110){repPhase="down";}
+    else if(repPhase==="down"&&e.a>150){repPhase="up";hit=true;}
+  }
+  if(hit){
+    lastRepAt=now;
+    var pr=getProg();
+    pr.t[t.id]=(pr.t[t.id]||0)+1;
+    save();
+    try{if(navigator.vibrate){navigator.vibrate(40);}}catch(er){}
+    if(pr.t[t.id]>=t.target){runId=null;showQuest();return;}
+    setStat(pr.t[t.id]+"/"+t.target,"");
+  }
+}
+
+function drawPose(cv,v,l){
+  if(!cv){return;}
+  if(v.videoWidth&&cv.width!==v.videoWidth){
+    cv.width=v.videoWidth;cv.height=v.videoHeight;
+    var w=cv.parentNode;
+    w.style.aspectRatio=v.videoWidth+"/"+v.videoHeight;
+    w.style.width=v.videoWidth>v.videoHeight?"190px":"120px";
+  }
+  var c=cv.getContext("2d");
+  c.clearRect(0,0,cv.width,cv.height);
+  if(!l){return;}
+  c.lineWidth=Math.max(2,cv.width/120);
+  c.strokeStyle="#7be0ff";c.fillStyle="#ffffff";
+  LINES.forEach(function(p){
+    var a=l[p[0]],b=l[p[1]];
+    if(a.visibility<0.4||b.visibility<0.4){return;}
+    c.beginPath();c.moveTo(a.x*cv.width,a.y*cv.height);c.lineTo(b.x*cv.width,b.y*cv.height);c.stroke();
+  });
+  [0,11,12,13,14,15,16,23,24,25,26,27,28].forEach(function(i){
+    var p=l[i];
+    if(p.visibility<0.4){return;}
+    c.beginPath();c.arc(p.x*cv.width,p.y*cv.height,c.lineWidth*1.6,0,6.3);c.fill();
+  });
+}
+
+function poseStep(){
+  var cv=document.getElementById("ov"),v=document.getElementById("cam");
+  if(!runId||!pose||!curT||!v||!camLive()||document.visibilityState!=="visible"){
+    if(cv){cv.getContext("2d").clearRect(0,0,cv.width,cv.height);}
+    return;
+  }
+  if(v.readyState<2||v.currentTime===lastVT){return;}
+  lastVT=v.currentTime;
+  var res;
+  try{res=pose.detectForVideo(v,performance.now());}catch(e){return;}
+  var l=res&&res.landmarks&&res.landmarks[0];
+  if(l&&bodyVisible(l,curT.upper)){seenAt=Date.now();}
+  if(l&&curT.kind==="reps"&&Date.now()-seenAt<1500){countRep(curT,l);}
+  drawPose(cv,v,l);
+}
+
+function tick(){
+  var now=Date.now(),dt=Math.min(now-lastTick,1500)/1000;
+  lastTick=now;
+  if(!runId||!curT||!document.getElementById("tm")){return;}
+  var t=curT,pr=getProg(),why=whyNot(t);
+  if(t.kind==="reps"){
+    setStat(Math.floor(pr.t[t.id]||0)+"/"+t.target,why);
+    return;
+  }
+  if(!why){
+    pr.t[t.id]=(pr.t[t.id]||0)+dt;
+    saveCnt++;
+    if(saveCnt%5===0){save();}
+  }
+  var left=t.dur-(pr.t[t.id]||0);
+  if(left<=0){pr.t[t.id]=t.dur;runId=null;save();showQuest();return;}
+  setStat(fmt(left),why);
+}
+
+function leaveQuest(){
+  runId=null;curT=null;stopCam();save();showMain();
+}
+
+function showQuest(result){
+  var now=new Date(),h=head();
+  shownAt=Date.now();
+  if(!isTrainingDay(now)){
+    h+='<p class="q">ДЕНЬ ОТДЫХА</p><p class="note">Сегодня '+DAYS[now.getDay()].toLowerCase()+', тренировки нет. Восстанавливайся.</p>';
+    h+='<button class="link" id="back">НАЗАД</button>';
+    sys.innerHTML=h;
+    document.getElementById("back").onclick=function(){showMain();};
+    return;
+  }
+  if(camStream&&!camLive()&&!runId){stopCam();}
+  var done=state.done.indexOf(dkey(now))>-1,tasks=questTasks(),pr=getProg(),cur=-1,ok=0;
+  tasks.forEach(function(t,idx){
+    var on=done||pr.c.indexOf(t.id)>-1;
+    if(on){ok++;}else if(cur<0){cur=idx;}
+  });
+  var all=ok===tasks.length;
+  var rt=runId?tasks.filter(function(x){return x.id===runId;})[0]:null;
+  curT=rt||null;
+  var init=rt?(rt.kind==="reps"?Math.floor(pr.t[rt.id]||0)+"/"+rt.target:fmt(rt.dur-(pr.t[rt.id]||0))):"";
+  h+='<p class="q">ЕЖЕДНЕВНЫЙ КВЕСТ</p><ul class="list">'+
+    '<li><span>Тренировка</span><b>'+partsFor(now).join(", ")+'</b></li>'+
+    '<li><span>Сложность</span><b>'+data.difficulty+'</b></li>'+
+    '<li><span>Награда</span><b>+'+XPGAIN[data.difficulty]+' XP</b></li></ul>';
+  if(camStream&&!done){
+    h+='<div class="camrow"><div class="camwrap"><video id="cam" autoplay muted playsinline></video><canvas id="ov"></canvas></div><div><div class="tm" id="tm">'+init+'</div><div class="stt" id="st">'+(rt?'':'Камера включена. Нажми НАЧАТЬ.')+'</div><div class="tip">'+(rt?tipFor(rt):'')+'</div><button class="go" id="camBtn" style="display:none">ВКЛЮЧИТЬ КАМЕРУ</button></div></div>';
+  }
+  tasks.forEach(function(t,idx){
+    var el=pr.t[t.id]||0,on=done||pr.c.indexOf(t.id)>-1,nd=taskNeed(t);
+    var idle=t.kind==="reps"?'Сканер: '+t.target+' повторов':'Таймер '+fmt(t.dur);
+    if(on){
+      h+='<div class="trow on"><span class="bx">✔</span><div class="tx">'+t.text+'<small>'+(t.kind==="reps"?t.target+' повторов':fmt(t.dur))+'</small></div></div>';
+    }else if(idx>cur){
+      h+='<div class="trow lock"><span class="bx"></span><div class="tx">'+t.text+'<small>'+idle+'</small></div></div>';
+    }else if(el>=nd-0.01){
+      h+='<div class="trow ready"><button class="bx" data-check="'+t.id+'"></button><div class="tx">'+t.text+'<small>Готово. Поставь галочку.</small></div></div>';
+    }else{
+      var run=runId===t.id;
+      var sm=run?'Идёт…':(el>0?(t.kind==="reps"?'Осталось '+Math.ceil(nd-el)+' повторов':'Осталось '+fmt(nd-el)):idle);
+      h+='<div class="trow"><span class="bx"></span><div class="tx">'+t.text+'<small>'+sm+'</small></div>'+
+        (run?'':'<button class="go" data-start="'+t.id+'">'+(el>0?'ПРОДОЛЖИТЬ':'НАЧАТЬ')+'</button>')+'</div>';
+    }
+  });
+  var msg=camMsg?camMsg:((!done&&!all)?'Задания по порядку. Повторы и время идут только когда сканер видит тебя.':'');
+  h+='<p class="note" style="min-height:22px;margin-top:4px'+(camMsg?';color:#ff9ab0;opacity:1':'')+'">'+msg+'</p>';
+  if(result){h+='<p class="gain">'+result+'</p>';}
+  h+=done?'<button class="btn off" disabled>СЕГОДНЯ ВЫПОЛНЕНО</button>':'<button class="btn'+(all?'':' off')+'" id="finishq"'+(all?'':' disabled')+'>КВЕСТ ВЫПОЛНЕН</button>';
+  h+='<button class="link" id="back">НАЗАД</button>';
+  sys.innerHTML=h;
+  var v=document.getElementById("cam");
+  if(v&&camStream){v.srcObject=camStream;var pl=v.play();if(pl&&pl.catch){pl.catch(function(){});}}
+  if(rt){setStat(init,whyNot(rt));}
+  Array.prototype.forEach.call(sys.querySelectorAll("[data-start]"),function(b){
+    b.onclick=function(){startTask(b.getAttribute("data-start"));};
+  });
+  Array.prototype.forEach.call(sys.querySelectorAll("[data-check]"),function(b){
+    b.onclick=function(){
+      var id=b.getAttribute("data-check"),p=getProg(),tk=questTasks().filter(function(x){return x.id===id;})[0];
+      if(!tk||(p.t[id]||0)<taskNeed(tk)-0.5||p.c.indexOf(id)>-1){return;}
+      p.c.push(id);
+      save();
+      showQuest();
+    };
+  });
+  var cb=document.getElementById("camBtn");
+  if(cb){cb.onclick=function(){startCam().then(function(){showQuest();});};}
+  var fq=document.getElementById("finishq");
+  if(fq){fq.onclick=completeQuest;}
+  document.getElementById("back").onclick=leaveQuest;
+}
+
+function completeQuest(){
+  if(Date.now()-shownAt<700){return;}
+  var now=new Date(),k=dkey(now);
+  if(!isTrainingDay(now)||state.done.indexOf(k)>-1){return;}
+  var tasks=questTasks(),pr=getProg();
+  for(var n=0;n<tasks.length;n++){
+    if(pr.c.indexOf(tasks[n].id)<0||(pr.t[tasks[n].id]||0)<taskNeed(tasks[n])-0.5){return;}
+  }
+  runId=null;curT=null;stopCam();
+  var disc=true,d=new Date(now);
+  for(var c=0;c<7;c++){
+    d.setDate(d.getDate()-1);
+    if(dkey(d)<state.start){break;}
+    if(isTrainingDay(d)){disc=state.done.indexOf(dkey(d))>-1;break;}
+  }
+  var g=XPGAIN[data.difficulty];
+  state.done.push(k);
+  state.xp+=g;state.stats.str+=1;state.stats.end+=1;
+  var msg="+"+g+" XP, СИЛА +1, ВЫНОСЛИВОСТЬ +1";
+  if(data.mind==="ДА"){state.stats.int+=1;msg+=", УМ +1";}
+  if(disc){state.stats.disc+=1;msg+=", ДИСЦИПЛИНА +1";}
+  var up=false;
+  while(state.xp>=need(state.lvl)){state.xp-=need(state.lvl);state.lvl+=1;up=true;}
+  if(up){msg+=". УРОВЕНЬ ПОВЫШЕН: LVL - "+state.lvl;}
+  save();
+  showQuest(msg);
+}
+
+function askMind(){
+  var h=head()+'<p class="q">Качаем ум? Чтение книг?</p><div class="hint" style="margin:0 0 12px">Если пропустить, УМ уберём из статистики</div><div class="opts"><button class="opt" data-v="ДА">ДА</button><button class="opt" data-v="ПРОПУСТИТЬ">ПРОПУСТИТЬ</button></div>';
+  sys.innerHTML=h;
+  Array.prototype.forEach.call(sys.querySelectorAll(".opt"),function(b){
+    b.onclick=function(){
+      data.mind=b.getAttribute("data-v");
+      try{localStorage.setItem("spu_profile",JSON.stringify(data));}catch(e){}
+      showMain();
+    };
+  });
+}
+
+lastTick=Date.now();
+setInterval(tick,1000);
+setInterval(poseStep,80);
+if(loadSaved()){if(data.mind){showMain();}else{askMind();}}else{render();}
+</script>
+</body>
+</html>
